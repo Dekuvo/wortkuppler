@@ -7,7 +7,7 @@
 	// export let data: LayoutData;
 </script>
 
-<div class="flex flex-col h-screen">
+<div class="flex flex-col screen h-dvh ">
 	<header class="flex-initial px-4 py-3 flex justify-between">
 		<h1 class="flex-col font-thin text-4xl uppercase tracking-wide">Wortkuppler</h1>
 		<nav class="drawer drawer-end w-auto shrink-0">
