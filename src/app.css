@@ -1,3 +1,36 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* open-sans-latin-wght-normal */
+@font-face {
+    font-family: 'Open Sans Variable';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 300 800;
+    font-stretch: 75% 100%;
+    src: url(@fontsource-variable/open-sans/files/open-sans-latin-wdth-normal.woff2) format('woff2-variations');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@layer utilities {
+    .font-condensed {
+        font-stretch: condensed;
+    }
+}
+
+@layer base {
+    body {
+        @apply font-open-sans text-dark;
+    }
+}
+
+.btn {
+    @apply rounded-none text-light;
+}
+
+.btn.btn-disabled, .btn[disabled], .btn:disabled
+{
+    background-color: oklch(var(--btn-color) / 0.2 );
+    @apply text-dark/50;
+}
