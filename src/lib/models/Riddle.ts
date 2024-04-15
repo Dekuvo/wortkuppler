@@ -10,11 +10,12 @@ export type RiddleGroups = {
 };
 
 export type RiddleWords = {
-    [key: string]: string | RiddleGroup;
+    [key: string]: string;
 };
 
 export interface Riddle {
     id: string;
+    wordsPerGroup: number;
     groups: RiddleGroups;
     words: RiddleWords;
     score?:number;
