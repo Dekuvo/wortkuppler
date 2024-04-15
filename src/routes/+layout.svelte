@@ -7,7 +7,7 @@
 	// export let data: LayoutData;
 </script>
 
-<div class="flex flex-col screen h-dvh ">
+<div class="flex flex-col screen h-dvh">
 	<header class="flex-initial px-4 py-3 flex justify-between">
 		<h1 class="flex-col font-thin text-4xl uppercase tracking-wide">Wortkuppler</h1>
 		<nav class="drawer drawer-end w-auto shrink-0">
@@ -17,7 +17,7 @@
 			</label>
             <div class="drawer-side overflow-x-hidden">
                 <label for="menu" aria-label="close sidebar" class="drawer-overlay"></label>
-                <ul tabindex="0" class="menu p-4 w-80 min-h-full bg-light text-base-content rounded-none [&_li>*]:rounded-none">
+                <ul tabindex="0" class="menu p-4 w-80 min-h-full bg-light text-2xl text-base-content rounded-none [&_li>*]:rounded-none">
                     <li class="hover:bg-select"><a>Heutiges Rätsel</a></li>
                     <li class="hover:bg-select"><a>Archiv</a></li>
                     <li class="hover:bg-select"><label for="menu" aria-label="close sidebar" class="drawer-overlay">Schließen</label></li>
@@ -30,7 +30,7 @@
         <slot />
     </main>
 
-    <footer class="flex-initial">
+    <footer class="flex-initial text-center text-select">
         © workuppler
     </footer>
 </div>

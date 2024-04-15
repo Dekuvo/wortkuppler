@@ -7,7 +7,7 @@
     export let btnClass:string = 'btn-info';
 </script>
 
-<button class="flex justify-between btn {btnClass} {iconRight?'flex-row-reverse ':''} h-1/4 px-2 uppercase text-xl font-light tracking-tighter font-condensed">
+<button class="flex justify-between btn {btnClass} {iconRight?'flex-row-reverse ':''} h-full px-2 uppercase text-2xl font-light tracking-tighter font-condensed">
     {#if icon}
         <Icon icon="{icon}" class="text-3xl flex-initial" />
     {/if}
