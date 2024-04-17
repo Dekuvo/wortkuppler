@@ -5,14 +5,10 @@
 
 	// TODO: import riddle dynamically
 	import { riddle } from '../today';
-	import { WordState } from '$lib/models/Word';
+	import { WordPlace, WordState } from '$lib/models/Word';
+	import type Game from '$lib/models/Game';
 
-	let guesses:string[] = [];
-	$: guessable = guesses.length < riddle.wordsPerGroup;
-
-
-	
-	// for easier access, collect all the words in their corresponding groups
+	// for easier access, collect all the words in their corresponding groups (like a cache)
 	for (const word in riddle.words) {
 		const groupId = riddle.words[word];
 		if (typeof groupId === 'string' && groupId in riddle.groups) {
@@ -22,46 +18,67 @@
 		}
 	}
 	
+	let game:Game = {
+		words: Object.keys(riddle.words),
+		guesses: [],
+		solved: [],
+	}
+	
+	// some shortcuts to determining the game state in the ui
+	$: guessesEmpty = game.guesses.length <= 0;
+	$: guessesFull = game.guesses.length >= riddle.wordsPerGroup; // false if the user still can choose a word, true if guesses are full
+
+
+
+	
+	
 	function wordSelect(event:CustomEvent) {
-		console.log( guessable );
-		if( guessable ) {
-			
-			guesses = [...guesses, event.detail];
-		
-		} else {
+		if( guessesFull ) {
 			event.preventDefault();
+		} else {
+			game.guesses = [...game.guesses, event.detail];
 		}
 	}
 
 	function wordDeselect(event:CustomEvent) {
-		
-		
-		console.log(event);
+		game.guesses = game.guesses.filter(guess => guess !== event.detail);
+
+	}
+
+	function wordsClear(event:CustomEvent) {
+		game.guesses = [];
+
 	}
 </script>
 
 <ul
-	class="h-2/3 grid grid-cols-2 grid-rows-{Object.keys(riddle.words).length /
+	class="group h-2/3 grid grid grid-cols-2 grid-rows-{Object.keys(riddle.words).length /
 		2} text-2xl font-light tracking-tighter font-condensed"
+	
 >
-	{#each Object.keys(riddle.words) as word}
-		<Word word={word} on:select={wordSelect} />
+	{#each game.words as word}
+	<!-- {#if !game.guesses.includes(word)} -->
+		
+	<Word word={word} state={ game.guesses.includes(word) ? WordState.selected : WordState.normal} place={WordPlace.list} guessable={!guessesFull} on:select={wordSelect} on:deselect={wordDeselect} />
+	<!-- {/if} -->
 	{/each}
 </ul>
 
 <section class="mt-[calc(100%/24)] h-1/4 bg-light grid grid-cols-2 grid-rows-[1fr,2fr] font-light" >
-	<GuessButton btnClass="btn-warning" icon="material-symbols-light:close">Leeren</GuessButton>
-	<GuessButton btnClass="btn-info" icon="system-uicons:chain" iconRight>Kuppeln</GuessButton>
+	<GuessButton disabled={guessesEmpty} btnClass="btn-warning" icon="material-symbols-light:close" on:click={wordsClear}>Leeren</GuessButton>
+	<GuessButton disabled={!guessesFull} btnClass="btn-info" icon="system-uicons:chain" iconRight>Kuppeln</GuessButton>
 	<ul
 		class="grid grid-cols-2 grid-rows-2 text-2xl font-light tracking-tighter col-span-full font-condensed"
 		
 	>
-		<li class="grid hidden px-12 text-center only:block place-content-center col-span-full row-span-full">
+	{#each game.guesses as guess}
+		<Word word={guess} place={WordPlace.guesses} state={WordState.guessed} on:deselect={wordDeselect} />
+	{/each	}
+	{#if guessesEmpty}
+		<li class="px-12 text-center transition-all place-content-center col-span-full row-span-full">
 			Wähle vier Begriffe, die etwas gemeinsam haben, und drücke dann auf KUPPELN.
 		</li>
-		{#each guesses as guess}
-			<Word word={guess} state={WordState.guessed} on:select={wordDeselect} />
-		{/each	}
+	{/if}
 	</ul>
 </section>
 

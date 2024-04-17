@@ -6,7 +6,14 @@ export enum WordState {
     invisible
 }
 
+export enum WordPlace {
+    list,
+    guesses,
+    solved,
+}
+
 export interface Word {
     text: string,
+    place?: WordPlace,
     state?: WordState,
 }
