@@ -2,6 +2,7 @@ export enum WordState {
     normal,
     selected,
     guessed,
+    lastGuess,
     coupled,
     invisible
 }
@@ -9,7 +10,7 @@ export enum WordState {
 export enum WordPlace {
     list,
     guesses,
-    solved,
+    coupled,
 }
 
 export interface Word {

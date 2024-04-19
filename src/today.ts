@@ -3,6 +3,7 @@ import type { Riddle, RiddleWords } from '$lib/models/Riddle';
 export let riddle: Riddle = {
     id: '123456',
     wordsPerGroup: 4,
+    // mistakes: 1,
     groups: {
         olympisch: {
             title: 'Olympisch 2024',
@@ -16,7 +17,7 @@ export let riddle: Riddle = {
         },
         kanaren: {
             title: 'Kanarische Inseln',
-            infos: 'Dies sind 4 von insgesamt 7 Inseln die zu den Kanaren zählen.',
+            infos: 'Dies sind 4 der insgesamt 7 Inseln, die zu den Kanaren zählen.',
             url: 'https://de.wikipedia.org/wiki/Kanarische_Inseln#Geographie'
         },
         likoerwein: {

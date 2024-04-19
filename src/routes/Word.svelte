@@ -13,19 +13,39 @@
 		let classes: string[] = [];
 		switch (state) {
 			case WordState.normal:
-				if (guessable) classes.push('[@media(hover)]:hover:bg-select');
-				if (!guessable) classes.push('cursor-not-allowed','text-select');
+				classes.push('bg-light');
+				if (guessable) {
+					classes.push('cursor-pointer', '[@media(hover)]:hover:bg-select');
+				} else {
+					classes.push('cursor-not-allowed', 'text-select');
+				}
 				break;
 
 			case WordState.selected:
-				// classes.push('bg-select');
-				classes.push('opacity-50','[@media(hover)]:hover:bg-red','[@media(hover)]:hover:text-light');
+				classes.push(
+					'bg-light',
+					'opacity-50',
+					'cursor-pointer',
+					'[@media(hover)]:hover:bg-red',
+					'[@media(hover)]:hover:text-light'
+				);
 
 				break;
 
 			case WordState.guessed:
-				classes.push('bg-select','[@media(hover)]:hover:bg-red','[@media(hover)]:hover:text-light');
-				classes.push('bg-select');
+				classes.push(
+					'bg-select',
+					'cursor-pointer',
+					'[@media(hover)]:hover:bg-red',
+					'[@media(hover)]:hover:text-light'
+				);
+				break;
+
+			case WordState.lastGuess:
+				classes.push(
+					'bg-select',
+					'cursor-not-allowed',
+				);
 				break;
 
 			case WordState.coupled:
@@ -41,11 +61,11 @@
 		switch (state) {
 			case WordState.normal:
 				if (dispatch('select', word, { cancelable: true })) state = WordState.selected;
-				
+
 				break;
 
 			case WordState.selected:
-				if (dispatch('deselect', word, { cancelable: true }) ) state = WordState.normal;
+				if (dispatch('deselect', word, { cancelable: true })) state = WordState.normal;
 			case WordState.guessed:
 				dispatch('deselect', word, { cancelable: true });
 				break;
@@ -57,9 +77,7 @@
 </script>
 
 <li
-	class="grid px-2 text-center uppercase border-solid cursor-pointer bg-light place-content-center transition-all {classes}"
-	on:click={wordClick}
-	
+	class=" transition-all {classes}"
 >
-	{word}
+	<button class="grid w-full h-full px-2 text-2xl font-light tracking-tighter text-center uppercase place-content-center font-condensed" on:click={wordClick}>{word}</button>
 </li>

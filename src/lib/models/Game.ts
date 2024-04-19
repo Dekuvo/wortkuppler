@@ -1,6 +1,7 @@
 export enum GameState {
     guessing,
     mistake,
+    lastGuess,
     lost,
     won,
 }
