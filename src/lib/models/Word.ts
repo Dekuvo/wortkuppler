@@ -7,14 +7,9 @@ export enum WordState {
     invisible
 }
 
-export enum WordPlace {
-    list,
-    guesses,
-    coupled,
-}
-
-export interface Word {
-    text: string,
-    place?: WordPlace,
+export type Word = string;
+export type Words = Word[];
+export interface WordButton {
+    text: Word,
     state?: WordState,
 }

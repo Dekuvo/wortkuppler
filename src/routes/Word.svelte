@@ -6,7 +6,6 @@
 	const dispatch = createEventDispatcher();
 	export let guessable: boolean = true;
 	export let state: WordState = WordState.normal;
-	export let place: WordPlace = WordPlace.list;
 	export let word: string;
 
 	function getClassesForState(state: WordState, guessable: boolean) {

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { RiddleGroup } from '$lib/models/Riddle';
-	import { WordPlace, WordState } from '$lib/models/Word';
+	import { WordState } from '$lib/models/Word';
 	import { scale, slide } from 'svelte/transition';
 	import Word from './Word.svelte';
 	import Icon from '@iconify/svelte';
@@ -36,7 +36,7 @@
 			class="grid grid-cols-2 grid-rows-2 text-2xl font-light tracking-tighter h-2/3 {coupled?'bg-green':'bg-red text-light'} font-condensed"
 		>
 			{#each group.words ?? [] as word}
-				<Word {word} place={WordPlace.coupled} state={WordState.coupled} />
+				<Word {word} state={WordState.coupled} />
 			{/each}
 		</ul>
 		{#if group.infos}

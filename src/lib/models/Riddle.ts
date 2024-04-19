@@ -1,23 +1,28 @@
+import type { Word, Words } from "./Word";
+
+export type RiddleId = string;
+export type RiddleGroupId = string;
+
 export interface RiddleGroup {
     title: string;
     infos: string;
     url?: string;
-    words?: string[];
+    words?: Words;
 }
 
 export type RiddleGroups = {
-    [key: string]: RiddleGroup;
+    [key: RiddleGroupId]: RiddleGroup;
 };
 
 export type RiddleWords = {
-    [key: string]: string;
+    [key: Word]: RiddleGroupId;
 };
 
 export interface Riddle {
-    id: string;
+    id: RiddleId;
     wordsPerGroup: number;
     groups: RiddleGroups;
     words: RiddleWords;
     score?:number;
-    mistakes?:number;
+    mistakesAllowed?:number;
 }
