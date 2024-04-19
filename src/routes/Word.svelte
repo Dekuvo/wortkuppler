@@ -13,22 +13,22 @@
 		let classes: string[] = [];
 		switch (state) {
 			case WordState.normal:
-				if (guessable) classes.push('hover:bg-select');
+				if (guessable) classes.push('[@media(hover)]:hover:bg-select');
 				if (!guessable) classes.push('cursor-not-allowed','text-select');
 				break;
 
 			case WordState.selected:
 				// classes.push('bg-select');
-				classes.push('opacity-50','hover:bg-red','hover:text-light');
+				classes.push('opacity-50','[@media(hover)]:hover:bg-red','[@media(hover)]:hover:text-light');
 
 				break;
 
 			case WordState.guessed:
-				classes.push('bg-select','hover:bg-red','hover:text-light');
+				classes.push('bg-select','[@media(hover)]:hover:bg-red','[@media(hover)]:hover:text-light');
 				classes.push('bg-select');
 				break;
 
-			case WordState.solved:
+			case WordState.coupled:
 				break;
 		}
 
@@ -41,6 +41,7 @@
 		switch (state) {
 			case WordState.normal:
 				if (dispatch('select', word, { cancelable: true })) state = WordState.selected;
+				
 				break;
 
 			case WordState.selected:

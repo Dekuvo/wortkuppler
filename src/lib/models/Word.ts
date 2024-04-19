@@ -2,7 +2,7 @@ export enum WordState {
     normal,
     selected,
     guessed,
-    solved,
+    coupled,
     invisible
 }
 

@@ -1,7 +1,7 @@
 import type { Riddle, RiddleWords } from '$lib/models/Riddle';
 
 export let riddle: Riddle = {
-    id: crypto.randomUUID(),
+    id: '123456',
     wordsPerGroup: 4,
     groups: {
         olympisch: {

@@ -19,4 +19,5 @@ export interface Riddle {
     groups: RiddleGroups;
     words: RiddleWords;
     score?:number;
+    mistakes?:number;
 }
