@@ -1,8 +1,8 @@
 export enum WordState {
     normal,
     selected,
-    guessed,
-    lastGuess,
+    selection,
+    lastGroup,
     coupled,
     invisible
 }
