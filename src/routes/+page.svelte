@@ -15,7 +15,7 @@
 	let game:Game = new Game(riddle);
 
 	// derived stores to determine the state of the game a bit easier
-	let { selectedEmpty, selectedMaxed, uncoupledWords, mistakesRemaining , percentage } = game;
+	let { selectedEmpty, selectedMaxed, uncoupledWords, coupledGroups, mistakesRemaining , percentage } = game.derived;
 
 	// TODO: improve split of game area for better responsiveness
 	const unit = 100 / (Math.ceil(game.wordCount / 2) + 4);
@@ -77,7 +77,7 @@
 			style="height: {unit * 4}%"
 		>
 			Schade, heute nicht geschafft.
-		</section>last
+		</section>
 	{:else}
 		{#if $game.phase !== GamePhase.last}
 			<section style="height: {unit * 0.15}%"></section>
@@ -155,14 +155,14 @@
 	{/if}
 	<!-- #region COUPLED -->
 	{#if $game.phase == GamePhase.lost}
-		{#each Object.keys(riddle.groups) as group}
-			{#if !game.coupled.includes(group)}
-				<Couple group={riddle.groups[group]} coupled={false} height={unit * 2}></Couple>
+		{#each Object.keys(game.groups) as group}
+			{#if !$coupledGroups.includes(group)}
+				<Couple group={game.getGroupById(group)} coupled={false} height={unit * 2}></Couple>
 			{/if}
 		{/each}
 	{/if}
-	{#each game.coupled as group}
-		<Couple group={riddle.groups[group]} coupled={true} height={unit * 2}></Couple>
+	{#each $coupledGroups as group}
+		<Couple group={game.getGroupById(group)} coupled={true} height={unit * 2}></Couple>
 	{/each}
 	<!-- #endregion -->
 

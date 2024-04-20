@@ -30,11 +30,14 @@ export class Game {
     private gameState: Writable<GameState>;
     private mistakesAllowed: number;
 
-    public readonly selectedEmpty: Readable<boolean>;
-    public readonly selectedMaxed: Readable<boolean>;
-    public readonly uncoupledWords: Readable<Words>;
-    public readonly mistakesRemaining: Readable<number>;
-    public readonly percentage: Readable<number>;
+    public readonly derived: {
+        selectedEmpty: Readable<boolean>;
+        selectedMaxed: Readable<boolean>;
+        uncoupledWords: Readable<Words>;
+        coupledGroups: Readable<Array<RiddleGroupId>>;
+        mistakesRemaining: Readable<number>;
+        percentage: Readable<number>;
+    }
 
     constructor(riddle: Riddle) {
 
@@ -56,11 +59,15 @@ export class Game {
             selected: [],
             guesses: [],
         });
-        this.selectedEmpty = derived(this.gameState, gameState => this.selected.length <= 0);
-        this.selectedMaxed = derived(this.gameState, gameState => this.isSelectedMaxed());
-        this.uncoupledWords = derived(this.gameState, gameState => this.getUncoupledWords());
-        this.mistakesRemaining = derived(this.gameState, gameState => this.getMistakesRemaining());
-        this.percentage = derived(this.gameState, gameState => this.couples.length / this.groupCount);
+
+        this.derived = {
+            selectedEmpty: derived(this.gameState, gameState => this.selected.length <= 0),
+            selectedMaxed: derived(this.gameState, gameState => this.isSelectedMaxed()),
+            uncoupledWords: derived(this.gameState, gameState => this.getUncoupledWords()),
+            coupledGroups: derived(this.gameState, gameState => this.couples),
+            mistakesRemaining: derived(this.gameState, gameState => this.getMistakesRemaining()),
+            percentage: derived(this.gameState, gameState => this.couples.length / this.groupCount),
+        }
     }
 
     // #region: riddle methods
@@ -84,6 +91,10 @@ export class Game {
 
     public get groupCount() {
         return Object.keys(this.riddle.groups).length;
+    }
+
+    public getGroupById(groupId:RiddleGroupId) {
+        return this.riddle.groups[groupId];
     }
 
     // #endregion
@@ -124,6 +135,14 @@ export class Game {
         return this.selected.length >= this.riddle.wordsPerGroup;
     }
 
+    // TODO: do we need GamePhase.mistaken or can we use this function instead? 
+    // then we don't need to set GamePhase.playing in select/deselect/clear
+    public isSelectedMistake(): boolean {
+        if (!this.isSelectedMaxed()) return false;
+        const guess = this.searchSelectedInGuesses();
+        return typeof guess !== 'undefined' && typeof guess.group === 'undefined';
+    }
+    
     public select(word: Word): boolean {
         this.phase = GamePhase.playing;
 
@@ -132,6 +151,8 @@ export class Game {
             game.selected.push(word);
             return game;
         })
+        console.log(this.isSelectedMistake());
+        
         if (this.isSelectedMistake()) this.phase = GamePhase.mistaken;
         return true;
     }
@@ -151,22 +172,12 @@ export class Game {
         return true;
     }
 
-    // TODO: do we need GamePhase.mistaken or can we use this function instead? 
-    // then we don't need to set GamePhase.playing in select/deselect/clear
-    public isSelectedMistake(): boolean {
-        if (!this.isSelectedMaxed()) return false;
-        const guess = this.searchSelectedInGuesses();
-        return typeof guess !== 'undefined' && guess.group === 'undefined';
-    }
-
     public get guesses() {
         return get(this.gameState).guesses;
     }
 
     public addGuess(guess: GameGuess): boolean {
-        console.log(this.isSelectedMaxed())
         if (!this.isSelectedMaxed()) return false;
-        console.log(guess)
         this.gameState.update(game => {
             game.guesses.push(guess);
             return game;
