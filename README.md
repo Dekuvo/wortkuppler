@@ -1,5 +1,14 @@
-# wortkuppler - Ein tägliches Rätsel, bei dem es gilt Verbindungen zwischen Wörtern zu suchen
+[Deutsch 🇩🇪](README.de.md)
 
-Ein einfaches, aber herausforderndes Wortzuordnungsspiel. Jeden Tag werden den Spielern 16 Wörter präsentiert, die in vier Gruppen aufgeteilt werden müssen, basierend auf ihren verborgenen Zusammenhängen. Ziel ist es, die korrekte Gruppierung der Wörter zu finden und deren Beziehungen zu erkennen. 
+# wortkuppler 
+**a daily puzzle game, in which you have to find connections between words**
 
-Dieses Repository enthält den Quellcode und alle notwendigen Ressourcen (außer den Rätseln selbst, um Wortkuppler zu spielen und weiterzuentwickeln.
+> **wortkuppler**
+> 
+> *noun,  German, lit. 'word coupler' or 'word matchmaker'*
+>
+> Someone who connects words based on their relationsship.
+
+A simple but challenging word matching game. Each day, players are presented with a list of (usually 16) words, that must be divided into (usually four) groups based on their hidden connections. The goal is to find the correct grouping of words and discover their relationships. 
+
+This repository contains the source code and all the necessary resources (except the puzzles themselves) to play and develop wortkuppler.
