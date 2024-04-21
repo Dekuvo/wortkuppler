@@ -1,6 +1,6 @@
 
 import { derived, get, writable, type Invalidator, type Readable, type Subscriber, type Unsubscriber, type Updater, type Writable } from 'svelte/store';
-import type { Riddle, RiddleGroupId } from './Riddle';
+import type { Riddle, RiddleGroupId, RiddleId } from './Riddle';
 import type { Word, Words } from './Word';
 
 // #region: type declarations
@@ -14,12 +14,12 @@ export enum GamePhase {
 }
 
 export interface GameGuess {
-    words: string[],
+    words: Words,
     group?: RiddleGroupId,
 }
 
 export interface GameState {
-    riddle: string;
+    riddle: RiddleId;
     selection: Words;
     guesses: GameGuess[];
 }
@@ -32,14 +32,13 @@ export class Game {
 
     public readonly riddle: Riddle;
     private gameState: Writable<GameState>;
-    private mistakesAllowed: number;
 
     public readonly derived: {
         phase: Readable<GamePhase>;
         selectionEmpty: Readable<boolean>;
         selectionFull: Readable<boolean>;
         uncoupledWords: Readable<Words>;
-        coupledGroups: Readable<Array<RiddleGroupId>>;
+        coupledGroupIds: Readable<Array<RiddleGroupId>>;
         mistakesRemaining: Readable<number>;
         percentage: Readable<number>;
     }
@@ -50,7 +49,7 @@ export class Game {
 
     constructor(riddle: Riddle) {
 
-        // for easier access, collect all the words in their corresponding groups (like a cache)
+        // store all the words in the corresponding groups of the riddles (cache)
         for (const group in riddle.groups) riddle.groups[group].words = [];
         for (const word in riddle.words) {
             const groupId = riddle.words[word];
@@ -59,8 +58,6 @@ export class Game {
             }
         }
 
-        this.mistakesAllowed = riddle.mistakesAllowed ?? Object.keys(riddle.groups).length;
-
         this.riddle = riddle;
         this.gameState = writable<GameState>({
             riddle: riddle.id,
@@ -68,15 +65,15 @@ export class Game {
             guesses: [],
         });
 
-        // create several derivates using the svelte derived store
+        // create several derivates using svelte derived stores, to hide the calculations from the components that use them
         this.derived = {
             phase: derived(this.gameState, gameState => this.getPhase()),
             selectionEmpty: derived(this.gameState, gameState => this.selection.length <= 0),
             selectionFull: derived(this.gameState, gameState => this.isSelectionFull()),
             uncoupledWords: derived(this.gameState, gameState => this.uncoupledWords),
-            coupledGroups: derived(this.gameState, gameState => this.couples),
+            coupledGroupIds: derived(this.gameState, gameState => this.coupledGroupIds),
             mistakesRemaining: derived(this.gameState, gameState => this.getMistakesRemaining()),
-            percentage: derived(this.gameState, gameState => this.couples.length / this.groupCount),
+            percentage: derived(this.gameState, gameState => this.coupledGroupIds.length / this.groupIds.length ),
         }
     }
 
@@ -89,7 +86,7 @@ export class Game {
     }
 
     public get uncoupledWords() {
-        return this.words.filter(word => !this.couples.includes(this.riddle.words[word]));
+        return this.words.filter(word => !this.coupledGroupIds.includes(this.riddle.words[word]));
     }
 
     public get wordCount() {
@@ -98,10 +95,6 @@ export class Game {
 
     public get groupIds() {
         return Object.keys(this.riddle.groups);
-    }
-
-    public get groupCount() {
-        return this.groupIds.length;
     }
 
     public getGroupById(groupId: RiddleGroupId) {
@@ -113,9 +106,8 @@ export class Game {
     // #region: game actions
 
     public select(word: Word): boolean {
-        if (!this.isWordSelectable(word)) return false;
+        if (this.isSelectionFull() || this.selection.includes(word)) return false;
         this.selection = [...this.selection, word];
-
         return true;
     }
 
@@ -149,7 +141,7 @@ export class Game {
             const group = this.riddle.words[this.selection[0]];
             guess.group = group;
 
-            const coupled = this.couples;
+            const coupled = this.coupledGroupIds;
             if (!coupled.includes(group)) {
 
                 this.guesses = [...this.guesses, guess];
@@ -167,14 +159,7 @@ export class Game {
 
     // #endregion
 
-
-
-
     // #region: game checks
-
-    public isWordSelectable(word: Word) {
-        return !this.isSelectionFull() && !this.selection.includes(word);
-    }
 
     public isSelectionFull() {
         return this.selection.length >= this.riddle.wordsPerGroup;
@@ -192,7 +177,7 @@ export class Game {
     }
 
     public isLastCouple() {
-        return this.groupCount - this.couples.length == 1;
+        return this.groupIds.length - this.coupledGroupIds.length == 1;
     }
 
     // #endregion
@@ -212,7 +197,7 @@ export class Game {
     }
 
     public getMistakesRemaining() {
-        return this.mistakesAllowed - this.mistakes.length;
+        return (this.riddle.mistakesAllowed ?? this.groupIds.length) - this.mistakenGuesses.length;
     }
 
     /**
@@ -258,12 +243,12 @@ export class Game {
     }
 
     // derived from guesses
-    public get couples() {
+    public get coupledGroupIds() {
         return this.guesses.reduce<RiddleGroupId[]>((couples, guess) => typeof guess.group !== 'undefined' ? [...couples, guess.group] : couples, new Array<RiddleGroupId>())
     }
 
     // derived from guesses
-    public get mistakes() {
+    public get mistakenGuesses():Words[] {
         return this.guesses.reduce<Words[]>((mistakes, guess) => typeof guess.group === 'undefined' ? [...mistakes, guess.words] : mistakes, new Array<Words>())
     }
 

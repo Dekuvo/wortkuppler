@@ -12,13 +12,13 @@
 
 	let game: Game = new Game(riddle);
 
-	// derived stores to determine the state of the game a bit easier
+	// derived stores, to encapsule game realted calculations in the Game class
 	let {
 		phase,
-		selectionEmpty: selectedEmpty,
-		selectionFull: selectedMaxed,
+		selectionEmpty,
+		selectionFull,
 		uncoupledWords,
-		coupledGroups,
+		coupledGroupIds,
 		mistakesRemaining,
 		percentage
 	} = game.derived;
@@ -61,7 +61,7 @@
 				<Word
 					{word}
 					state={$game.selection.includes(word) ? WordState.selected : WordState.normal}
-					selectable={!$selectedMaxed}
+					selectable={!$selectionFull}
 					on:select={selectWord}
 					on:deselect={deselectWord}
 				/>
@@ -107,7 +107,7 @@
 		>
 			{#if $phase !== GamePhase.last}
 				<GuessButton
-					disabled={$selectedEmpty}
+					disabled={$selectionEmpty}
 					btnClass="btn-warning"
 					icon="material-symbols-light:close"
 					on:click={clear}>Leeren</GuessButton
@@ -125,7 +125,7 @@
 				</div>
 			{:else}
 				<GuessButton
-					disabled={!$selectedMaxed}
+					disabled={!$selectionFull}
 					btnClass="btn-info{$phase === GamePhase.last ? ' col-span-full' : ''}"
 					icon="system-uicons:chain"
 					iconRight
@@ -142,7 +142,7 @@
 						on:deselect={deselectWord}
 					/>
 				{/each}
-				{#if $selectedEmpty}
+				{#if $selectionEmpty}
 					<li
 						class="grid px-12 text-center transition-all place-content-center col-span-full row-span-full"
 					>
@@ -163,12 +163,12 @@
 	<!-- #region COUPLED -->
 	{#if $phase == GamePhase.lost}
 		{#each game.groupIds as group}
-			{#if !$coupledGroups.includes(group)}
+			{#if !$coupledGroupIds.includes(group)}
 				<Couple group={game.getGroupById(group)} coupled={false} height={unit * 2}></Couple>
 			{/if}
 		{/each}
 	{/if}
-	{#each $coupledGroups.reverse() as group}
+	{#each $coupledGroupIds.reverse() as group}
 		<Couple group={game.getGroupById(group)} coupled={true} height={unit * 2}></Couple>
 	{/each}
 	<!-- #endregion -->
