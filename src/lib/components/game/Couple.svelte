@@ -2,7 +2,9 @@
 	import type { RiddleGroup } from '$lib/models/Riddle';
 	import { WordState } from '$lib/models/Word';
 	import { scale, slide } from 'svelte/transition';
-	import Word from './Word.svelte';
+	
+	import { Word } from '.';
+	
 	import Icon from '@iconify/svelte';
 
     export let group:RiddleGroup;

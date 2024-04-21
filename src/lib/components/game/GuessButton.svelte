@@ -12,6 +12,6 @@
     {#if icon}
         <Icon icon="{icon}" class="flex-initial text-3xl" />
     {/if}
-    <span class="flex-1 {icon?((iconRight?'ml-10':'mr-10')):''}"><slot /></span>
+    <span class="flex-1 {icon?((iconRight?'ml-10':'mr-10')):''}"><slot>Action</slot></span>
 </button>
 

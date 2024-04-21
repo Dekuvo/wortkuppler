@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { WordState } from '$lib/models/Word';
-	import { scale } from 'svelte/transition';
 
 	const dispatch = createEventDispatcher();
 	export let selectable: boolean = true;
