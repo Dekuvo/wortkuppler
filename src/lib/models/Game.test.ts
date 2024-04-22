@@ -4,7 +4,6 @@ import { Game, GamePhase } from './Game';
 
 const testRiddle = {
     id: '1',
-    wordsPerGroup: 2,
     groups: {
         'groupa': { title: 'Group A' },
         'groupb': { title: 'Group B' },
@@ -33,12 +32,32 @@ describe('Game creation', () => {
         expect.soft(game.riddle.groups['groupb'].words).toEqual(['Word 1b', 'Word 2b']);
     });
 
-    it.skip('detects faulty riddles', () => {
-        function faulty() {
-            const faulty = { id: '2', wordsPerGroup: 5, groups: { 'g1': { title: 'G1' }, 'g2': { title: 'G2' }, }, words: { 'W1': 'g1', 'W2': 'g2', 'W3': 'g2', } };
+    it('detects faulty/assymetric riddles', () => {
+        
+        function faulty1() {
+            const faulty = { id: '2',groups: {  }, words: { } };
             return new Game(faulty);
         }
-        expect(faulty).toThrowError();
+        expect(faulty1).toThrowError('no groups');
+
+        function faulty2() {
+            const faulty = { id: '2',groups: { 'g1': { title: 'G1' }, 'g2': { title: 'G2' }, }, words: { } };
+            return new Game(faulty);
+        }
+        expect(faulty2).toThrowError('no words');
+
+        function assymetric1() {
+            const faulty = { id: '2', groups: { 'g1': { title: 'G1' }, 'g2': { title: 'G2' }, }, words: { 'W1': 'g1', 'W2': 'g2', 'W3': 'g2' } };
+            return new Game(faulty);
+        }
+        expect(assymetric1).toThrowError('assymetric');
+        
+        function assymetric2() {
+            const faulty = { id: '2', groups: { 'g1': { title: 'G1' }, 'g2': { title: 'G2' }, }, words: { 'W1': 'g1', 'W2': 'g2', 'W3': 'g2', 'W4': 'g2', } };
+            return new Game(faulty);
+        }
+        expect(assymetric2).toThrowError('assymetric');
+        
     });
 
     it('creates a set of derived stores', () => {
@@ -342,7 +361,6 @@ describe('helper function', () => {
     it('calculates the max count of words in selection, that belong to same group', () => {
         const testRiddle3x3 = {
             id: '1',
-            wordsPerGroup: 2,
             groups: {
                 'groupa': { title: 'Group A' },
                 'groupb': { title: 'Group B' },

@@ -2,8 +2,6 @@ import type { Riddle, RiddleWords } from '$lib/models/Riddle';
 
 export let riddle: Riddle = {
     id: '123456',
-    wordsPerGroup: 4,
-    // mistakes: 1,
     groups: {
         olympisch: {
             title: 'Olympisch 2024',

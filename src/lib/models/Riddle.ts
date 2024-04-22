@@ -20,7 +20,6 @@ export type RiddleWords = {
 
 export interface Riddle {
     id: RiddleId;
-    wordsPerGroup: number;
     groups: RiddleGroups;
     words: RiddleWords;
     score?:number;
