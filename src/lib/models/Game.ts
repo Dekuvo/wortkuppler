@@ -47,9 +47,10 @@ export class Game {
 
     // #region: constructor
 
+    // TODO: optional second argument to load an existing game
     constructor(riddle: Riddle) {
 
-        // store all the words in the corresponding groups of the riddles (cache)
+        // store all the words in the corresponding groups of the riddles (cache, overwrites)
         for (const group in riddle.groups) riddle.groups[group].words = [];
         for (const word in riddle.words) {
             const groupId = riddle.words[word];
@@ -57,6 +58,10 @@ export class Game {
                 riddle.groups[groupId].words!.push(word);
             }
         }
+
+        // TODO: verify riddle (groupCount * wordsPerGroup = wordCount, length of each group == wordsPerGroup)
+        // TODO: alternative: wordsPerGroup is automatically derived by wordCount / groupCount => must be integer, words evenly distributed
+        // if( riddle.wordsPerGroup > 4 ) throw new Error('riddle invalid, too many words per group');
 
         this.riddle = riddle;
         this.gameState = writable<GameState>({
