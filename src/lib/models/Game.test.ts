@@ -18,30 +18,17 @@ const testRiddle = {
 
 // #region Game creation
 describe('Game creation', () => {
-    it('initializes correctly', () => {
-        const game = new Game(testRiddle);
-        expect(game).toBeInstanceOf(Game);
-        expect(game.riddle).toStrictEqual(testRiddle);
-        expect(game.selection).toEqual([]);
-        expect(game.guesses).toEqual([]);
-    });
-
-    it('caches words in riddle groups', () => {
-        const game = new Game(testRiddle);
-        expect.soft(game.riddle.groups['groupa'].words).toEqual(['Word 1a', 'Word 2a']);
-        expect.soft(game.riddle.groups['groupb'].words).toEqual(['Word 1b', 'Word 2b']);
-    });
 
     it('detects faulty/assymetric riddles', () => {
-        
+
         function faulty1() {
-            const faulty = { id: '2',groups: {  }, words: { } };
+            const faulty = { id: '2', groups: {}, words: {} };
             return new Game(faulty);
         }
         expect(faulty1).toThrowError('no groups');
 
         function faulty2() {
-            const faulty = { id: '2',groups: { 'g1': { title: 'G1' }, 'g2': { title: 'G2' }, }, words: { } };
+            const faulty = { id: '2', groups: { 'g1': { title: 'G1' }, 'g2': { title: 'G2' }, }, words: {} };
             return new Game(faulty);
         }
         expect(faulty2).toThrowError('no words');
@@ -51,13 +38,83 @@ describe('Game creation', () => {
             return new Game(faulty);
         }
         expect(assymetric1).toThrowError('assymetric');
-        
+
         function assymetric2() {
             const faulty = { id: '2', groups: { 'g1': { title: 'G1' }, 'g2': { title: 'G2' }, }, words: { 'W1': 'g1', 'W2': 'g2', 'W3': 'g2', 'W4': 'g2', } };
             return new Game(faulty);
         }
         expect(assymetric2).toThrowError('assymetric');
+
+    });
+
+    it('initializes correctly', () => {
+        const game = new Game(testRiddle);
+        expect(game).toBeInstanceOf(Game);
+        expect(game.riddle).toStrictEqual(testRiddle);
+        expect(game.selection).toEqual([]);
+        expect(game.guesses).toEqual([]);
+    });
+
+    it('can load given game states', () => {
+        let game = new Game(testRiddle, {
+            riddle: testRiddle.id,
+            selection: ['Word 1a'],
+            guesses: []
+        });
+        expect(game.selection).toEqual(['Word 1a']);
         
+        game = new Game(testRiddle, {
+            riddle: testRiddle.id,
+            selection: ['Word 1a', 'Word 2a'],
+            guesses: [
+                { words: ['Word 1b', 'Word 2b'], group: 'groupb' },
+            ]
+        });
+        expect(game.guesses).toHaveLength(1);
+
+        function faulty1() {
+            return new Game(testRiddle, {
+                riddle: 'incorrect id',
+                selection: [],
+                guesses: []
+            });
+        }
+        expect(faulty1).toThrowError('different riddle');
+
+        function faulty2() {
+            return new Game(testRiddle, {
+                riddle: testRiddle.id,
+                selection: ['Unknown word'],
+                guesses: []
+            });
+        }
+        expect(faulty2).toThrowError('unknown words in selection');
+
+        function faulty3() {
+            return new Game(testRiddle, {
+                riddle: testRiddle.id,
+                selection: [],
+                guesses: [{ words: ['Unknown words'] }]
+            });
+        }
+        expect(faulty3).toThrowError('unknown words in guess');
+
+        function faulty4() {
+            return new Game(testRiddle, {
+                riddle: testRiddle.id,
+                selection: [],
+                guesses: [{ words: ['Word 1a', 'Word 2a'], group: 'unknown group' }]
+            });
+        }
+        expect(faulty4).toThrowError('unknown group in guess');
+
+    });
+
+
+    it('caches words in riddle groups', () => {
+        const game = new Game(testRiddle);
+        expect.soft(game.riddle.groups['groupa'].words).toEqual(['Word 1a', 'Word 2a']);
+        expect.soft(game.riddle.groups['groupb'].words).toEqual(['Word 1b', 'Word 2b']);
     });
 
     it('creates a set of derived stores', () => {

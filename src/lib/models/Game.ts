@@ -27,6 +27,7 @@ export interface GameState {
 
 
 export class RiddleError extends Error { }
+export class GameError extends Error { }
 
 
 export class Game {
@@ -50,13 +51,12 @@ export class Game {
 
     // #region: constructor
 
-    // TODO: optional second argument to load an existing game
-    constructor(riddle: Riddle) {
+    constructor(riddle: Riddle, state?:GameState) {
 
         this.validateRiddle(riddle);
 
         // store all the words in the corresponding groups of the riddles (cache, overwrites)
-        // TODO: consider moving this into the game props, so the riddle is immutable and won't offer possibility for contradictig data
+        // TODO: consider moving this into the game properties, so the riddle is immutable and won't offer possibility for storing contradictig data
         for (const group in riddle.groups) riddle.groups[group].words = [];
         for (const word in riddle.words) {
             const groupId = riddle.words[word];
@@ -66,11 +66,17 @@ export class Game {
         }
 
         this.riddle = riddle;
-        this.gameState = writable<GameState>({
-            riddle: riddle.id,
-            selection: [],
-            guesses: [],
-        });
+
+        // load default (unplayed) GameState if none is provided
+        if (typeof state === 'undefined') {
+           state = {
+                riddle: riddle.id,
+                selection: [],
+                guesses: [],
+            };
+        } else this.validateGameState(state);
+
+        this.gameState = writable<GameState>(state);
 
         // create several derivates using svelte derived stores, to hide the calculations from the components that use them
         this.derived = {
@@ -82,6 +88,15 @@ export class Game {
             mistakesRemaining: derived(this.gameState, gameState => this.getMistakesRemaining()),
             percentage: derived(this.gameState, gameState => this.coupledGroupIds.length / this.groupIds.length),
         };
+    }
+
+    private validateGameState(state:GameState) {
+        if ( state.riddle !== this.riddle.id ) throw new GameError('loaded game state is for different riddle');
+        if( !state.selection.every(word => word in this.riddle.words) ) throw new GameError('unknown words in selection of game state');
+        state.guesses.forEach((guess, index) => {
+            if( !guess.words.every(word => word in this.riddle.words) ) throw new GameError(`unknown words in guess #${index} of game state`);
+            if( guess.group && !this.groupIds.includes(guess.group) ) throw new GameError(`unknown group ${guess.group} in guess #${index} of game state`);
+        });
     }
 
     // #endregion
