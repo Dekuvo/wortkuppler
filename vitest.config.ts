@@ -20,6 +20,7 @@ const config: UserConfig & { test: VitestConfig['test'] } = {
     setupFiles: ['./vitest-setup.ts'],
     // Exclude files in v8
     coverage: {
+      provider: 'v8',
       exclude: ['vitest-setup.ts']
     },
     // Exclude playwright tests folder

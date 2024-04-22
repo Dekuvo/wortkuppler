@@ -90,12 +90,12 @@ export class Game {
         return Object.keys(this.riddle.words);
     }
 
-    public get uncoupledWords() {
-        return this.words.filter(word => !this.coupledGroupIds.includes(this.riddle.words[word]));
-    }
-
     public get wordCount() {
         return this.words.length;
+    }
+
+    public get uncoupledWords() {
+        return this.words.filter(word => !this.coupledGroupIds.includes(this.riddle.words[word]));
     }
 
     public get groupIds() {
@@ -104,6 +104,30 @@ export class Game {
 
     public getGroupById(groupId: RiddleGroupId) {
         return this.riddle.groups[groupId];
+    }
+
+
+    // #endregion
+
+    // #region: game checks
+
+    public isSelectionFull() {
+        return this.selection.length >= this.riddle.wordsPerGroup;
+    }
+
+    /**
+     * Checks wether the current selection was previously guessed and is therefore a mistake
+     * @returns {boolean} true if previously guessed and was a mistake, otherwise false
+     */
+    public isSelectionMistake(): boolean {
+        if (!this.isSelectionFull()) return false;
+        // try to find current selection in previous guesses
+        const guess = this.guesses.find(guess => this.selection.sort().join() == guess.words.sort().join());
+        return typeof guess !== 'undefined' && typeof guess.group === 'undefined';
+    }
+
+    public isLastCouple() {
+        return this.groupIds.length - this.coupledGroupIds.length == 1;
     }
 
     // #endregion
@@ -164,42 +188,7 @@ export class Game {
 
     // #endregion
 
-    // #region: game checks
-
-    public isSelectionFull() {
-        return this.selection.length >= this.riddle.wordsPerGroup;
-    }
-
-    /**
-     * Checks wether the current selection was previously guessed and is therefore a mistake
-     * @returns {boolean} true if previously guessed and was a mistake, otherwise false
-     */
-    public isSelectionMistake(): boolean {
-        if (!this.isSelectionFull()) return false;
-        // try to find current selection in previous guesses
-        const guess = this.guesses.find(guess => this.selection.sort().join() == guess.words.sort().join());
-        return typeof guess !== 'undefined' && typeof guess.group === 'undefined';
-    }
-
-    public isLastCouple() {
-        return this.groupIds.length - this.coupledGroupIds.length == 1;
-    }
-
-    // #endregion
-
     // #region: helper functions
-
-    /**
-     * Derives the phase of the game by the values of the GameState
-     * @returns {GamePhase} 
-     */
-    public getPhase() {
-        if (this.uncoupledWords.length <= 0) return GamePhase.won;
-        if (this.getMistakesRemaining() <= 0) return GamePhase.lost;
-        if (this.isLastCouple()) return GamePhase.last;
-        if (this.isSelectionMistake()) return GamePhase.mistaken;
-        return GamePhase.playing;
-    }
 
     public getMistakesRemaining() {
         return (this.riddle.mistakesAllowed ?? this.groupIds.length) - this.mistakenGuesses.length;
@@ -220,6 +209,17 @@ export class Game {
         return Math.max(...Object.values(counts));
     }
 
+    /**
+     * Derives the phase of the game by the values of the GameState
+     * @returns {GamePhase} 
+     */
+    public getPhase() {
+        if (this.getMistakesRemaining() <= 0) return GamePhase.lost;
+        if (this.uncoupledWords.length <= 0) return GamePhase.won;
+        if (this.isLastCouple()) return GamePhase.last;
+        if (this.isSelectionMistake()) return GamePhase.mistaken;
+        return GamePhase.playing;
+    }
 
     // #endregion
 
@@ -257,7 +257,7 @@ export class Game {
         return this.guesses.reduce<Words[]>((mistakes, guess) => typeof guess.group === 'undefined' ? [...mistakes, guess.words] : mistakes, new Array<Words>())
     }
 
-
+    /* v8 ignore start */
     set(value: GameState): void {
         this.gameState.set(value);
     }
@@ -269,6 +269,7 @@ export class Game {
     subscribe(run: Subscriber<GameState>, invalidate?: Invalidator<GameState>): Unsubscriber {
         return this.gameState.subscribe(run, invalidate);
     }
+    /* v8 ignore stop */
 
     // #endregion
 
