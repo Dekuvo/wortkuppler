@@ -7,10 +7,10 @@
 	import {Word, Couple, GuessButton} from '../lib/components/game';
 	
 	
-	// TODO: import riddle dynamically
-	import { riddle } from '../today';
+	// TODO: import puzzle dynamically
+	import { puzzle } from '../today';
 	
-	let game: Game = new Game(riddle);
+	let game: Game = new Game(puzzle);
 
 	// derived stores, to encapsule game realted calculations in the Game class
 	let {

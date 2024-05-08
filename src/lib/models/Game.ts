@@ -1,6 +1,6 @@
 
 import { derived, get, writable, type Invalidator, type Readable, type Subscriber, type Unsubscriber, type Updater, type Writable } from 'svelte/store';
-import type { Riddle, RiddleGroupId, RiddleId } from './Riddle';
+import type { Puzzle, PuzzleGroupId, PuzzleId } from './Puzzle';
 import type { Word, Words } from './Word';
 
 // #region: type declarations
@@ -15,18 +15,18 @@ export enum GamePhase {
 
 export interface GameGuess {
     words: Words,
-    group?: RiddleGroupId,
+    group?: PuzzleGroupId,
 }
 
 export interface GameState {
-    riddle: RiddleId;
+    puzzle: PuzzleId;
     selection: Words;
     guesses: GameGuess[];
 }
 // #endregion
 
 
-export class RiddleError extends Error { }
+export class PuzzleError extends Error { }
 export class GameError extends Error { }
 
 
@@ -34,7 +34,7 @@ export class Game {
 
     // #region: properties
 
-    public readonly riddle: Riddle;
+    public readonly puzzle: Puzzle;
     private gameState: Writable<GameState>;
 
     public readonly derived: {
@@ -42,7 +42,7 @@ export class Game {
         selectionEmpty: Readable<boolean>;
         selectionFull: Readable<boolean>;
         uncoupledWords: Readable<Words>;
-        coupledGroupIds: Readable<Array<RiddleGroupId>>;
+        coupledGroupIds: Readable<Array<PuzzleGroupId>>;
         mistakesRemaining: Readable<number>;
         percentage: Readable<number>;
     };
@@ -51,26 +51,26 @@ export class Game {
 
     // #region: constructor
 
-    constructor(riddle: Riddle, state?:GameState) {
+    constructor(puzzle: Puzzle, state?:GameState) {
 
-        this.validateRiddle(riddle);
+        this.validatePuzzle(puzzle);
 
-        // store all the words in the corresponding groups of the riddles (cache, overwrites)
-        // TODO: consider moving this into the game properties, so the riddle is immutable and won't offer possibility for storing contradictig data
-        for (const group in riddle.groups) riddle.groups[group].words = [];
-        for (const word in riddle.words) {
-            const groupId = riddle.words[word];
-            if (groupId in riddle.groups) {
-                riddle.groups[groupId].words!.push(word);
+        // store all the words in the corresponding groups of the puzzles (cache, overwrites)
+        // TODO: consider moving this into the game properties, so the puzzle is immutable and won't offer possibility for storing contradictig data
+        for (const group in puzzle.groups) puzzle.groups[group].words = [];
+        for (const word in puzzle.words) {
+            const groupId = puzzle.words[word];
+            if (groupId in puzzle.groups) {
+                puzzle.groups[groupId].words!.push(word);
             }
         }
 
-        this.riddle = riddle;
+        this.puzzle = puzzle;
 
         // load default (unplayed) GameState if none is provided
         if (typeof state === 'undefined') {
            state = {
-                riddle: riddle.id,
+                puzzle: puzzle.id,
                 selection: [],
                 guesses: [],
             };
@@ -91,33 +91,33 @@ export class Game {
     }
 
     private validateGameState(state:GameState) {
-        if ( state.riddle !== this.riddle.id ) throw new GameError('loaded game state is for different riddle');
-        if( !state.selection.every(word => word in this.riddle.words) ) throw new GameError('unknown words in selection of game state');
+        if ( state.puzzle !== this.puzzle.id ) throw new GameError('loaded game state is for different puzzle');
+        if( !state.selection.every(word => word in this.puzzle.words) ) throw new GameError('unknown words in selection of game state');
         state.guesses.forEach((guess, index) => {
-            if( !guess.words.every(word => word in this.riddle.words) ) throw new GameError(`unknown words in guess #${index} of game state`);
+            if( !guess.words.every(word => word in this.puzzle.words) ) throw new GameError(`unknown words in guess #${index} of game state`);
             if( guess.group && !this.groupIds.includes(guess.group) ) throw new GameError(`unknown group ${guess.group} in guess #${index} of game state`);
         });
     }
 
     // #endregion
 
-    // #region: riddle methods
+    // #region: puzzle methods
 
-    private validateRiddle(riddle: Riddle) {
+    private validatePuzzle(puzzle: Puzzle) {
 
-        const groupCount = Object.keys(riddle.groups).length;
-        const wordCount = Object.keys(riddle.words).length;
-        if (groupCount <= 0) throw new RiddleError('no groups in riddle');
-        if (wordCount <= 0) throw new RiddleError('no words in riddle');
+        const groupCount = Object.keys(puzzle.groups).length;
+        const wordCount = Object.keys(puzzle.words).length;
+        if (groupCount <= 0) throw new PuzzleError('no groups in puzzle');
+        if (wordCount <= 0) throw new PuzzleError('no words in puzzle');
 
         // words should be evenly divided between groups
         if (wordCount % groupCount !== 0)
             throw new Error('assymetric word to group mapping');
 
         // calculate the frequency of each group among words
-        const frequencies = Object.keys(riddle.groups).map(group => 0);
-        Object.values(riddle.words).forEach(group => {
-            const index = Object.keys(riddle.groups).indexOf(group);
+        const frequencies = Object.keys(puzzle.groups).map(group => 0);
+        Object.values(puzzle.words).forEach(group => {
+            const index = Object.keys(puzzle.groups).indexOf(group);
             frequencies[index]! = (frequencies[index] ?? 0) + 1;
         });
         const wordsPerGroup = Math.trunc( wordCount / groupCount );
@@ -127,7 +127,7 @@ export class Game {
     }
 
     public get words() {
-        return Object.keys(this.riddle.words);
+        return Object.keys(this.puzzle.words);
     }
 
     public get wordCount() {
@@ -135,15 +135,15 @@ export class Game {
     }
 
     public get uncoupledWords() {
-        return this.words.filter(word => !this.coupledGroupIds.includes(this.riddle.words[word]));
+        return this.words.filter(word => !this.coupledGroupIds.includes(this.puzzle.words[word]));
     }
 
     public get groupIds() {
-        return Object.keys(this.riddle.groups);
+        return Object.keys(this.puzzle.groups);
     }
 
-    public getGroupById(groupId: RiddleGroupId) {
-        return this.riddle.groups[groupId];
+    public getGroupById(groupId: PuzzleGroupId) {
+        return this.puzzle.groups[groupId];
     }
 
     public get wordsPerGroup() {
@@ -211,7 +211,7 @@ export class Game {
 
         // if all the guesses belong to one group, this group is correctly solved
         if (this.getMaxCorrelation() >= this.wordsPerGroup) {
-            const group = this.riddle.words[this.selection[0]];
+            const group = this.puzzle.words[this.selection[0]];
             guess.group = group;
 
             const coupled = this.coupledGroupIds;
@@ -235,7 +235,7 @@ export class Game {
     // #region: helper functions
 
     public getMistakesRemaining() {
-        return (this.riddle.mistakesAllowed ?? this.groupIds.length) - this.mistakenGuesses.length;
+        return (this.puzzle.mistakesAllowed ?? this.groupIds.length) - this.mistakenGuesses.length;
     }
 
     /**
@@ -245,9 +245,9 @@ export class Game {
     public getMaxCorrelation(): number {
 
         // for each group, count how many of the guessed words are in it
-        let counts = Object.fromEntries(Object.keys(this.riddle.groups).map((key) => [key, 0]));
+        let counts = Object.fromEntries(Object.keys(this.puzzle.groups).map((key) => [key, 0]));
         this.selection.forEach((word) => {
-            counts[this.riddle.words[word]]++;
+            counts[this.puzzle.words[word]]++;
         });
 
         return Math.max(...Object.values(counts));
@@ -293,7 +293,7 @@ export class Game {
 
     // derived from guesses
     public get coupledGroupIds() {
-        return this.guesses.reduce<RiddleGroupId[]>((couples, guess) => typeof guess.group !== 'undefined' ? [...couples, guess.group] : couples, new Array<RiddleGroupId>());
+        return this.guesses.reduce<PuzzleGroupId[]>((couples, guess) => typeof guess.group !== 'undefined' ? [...couples, guess.group] : couples, new Array<PuzzleGroupId>());
     }
 
     // derived from guesses

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { RiddleGroup } from '$lib/models/Riddle';
+	import type { PuzzleGroup } from '$lib/models/Puzzle';
 	import { WordState } from '$lib/models/Word';
 	import { scale, slide } from 'svelte/transition';
 	
@@ -7,7 +7,7 @@
 	
 	import Icon from '@iconify/svelte';
 
-    export let group:RiddleGroup;
+    export let group:PuzzleGroup;
     export let height:number;
     export let coupled:boolean = true;
     let info = false;
