@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { WordState } from '$lib/models/Word';
-	import { scale } from 'svelte/transition';
 
 	const dispatch = createEventDispatcher();
 	export let selectable: boolean = true;
 	export let state: WordState = WordState.normal;
 	export let word: string;
+	let disabled: boolean = false;
 
 	function getClassesForState(state: WordState, selectable: boolean) {
 		let classes: string[] = [];
@@ -52,16 +52,18 @@
 	}
 
 	$: classes = getClassesForState(state, selectable);
+	$: disabled = state === WordState.normal ? !selectable : state === WordState.lastGroup;
 
 	function wordClick(event: Event) {
 		switch (state) {
 			case WordState.normal:
 				if (dispatch('select', word, { cancelable: true })) state = WordState.selected;
-
 				break;
 
 			case WordState.selected:
 				if (dispatch('deselect', word, { cancelable: true })) state = WordState.normal;
+				break;
+				
 			case WordState.selection:
 				dispatch('deselect', word, { cancelable: true });
 				break;
@@ -72,9 +74,10 @@
 	}
 </script>
 
-<li class="transition-all ">
+<li class="transition-all">
 	<button
 		class="{classes} grid w-full h-full px-2 text-2xl font-light tracking-tighter text-center uppercase place-content-center font-condensed"
+		{disabled}
 		on:click={wordClick}>{word}</button
 	>
 </li>

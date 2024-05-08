@@ -5,7 +5,7 @@ export type RiddleGroupId = string;
 
 export interface RiddleGroup {
     title: string;
-    infos: string;
+    infos?: string;
     url?: string;
     words?: Words;
 }
@@ -20,7 +20,6 @@ export type RiddleWords = {
 
 export interface Riddle {
     id: RiddleId;
-    wordsPerGroup: number;
     groups: RiddleGroups;
     words: RiddleWords;
     score?:number;

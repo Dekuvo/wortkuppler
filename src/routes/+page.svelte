@@ -1,15 +1,15 @@
 <script lang="ts">
-	import Couple from './Couple.svelte';
 
 	import type { Word as WordType } from '$lib/models/Word';
-	import Word from './Word.svelte';
-	import GuessButton from './GuessButton.svelte';
-
+	import { Game, GamePhase } from '$lib/models/Game';
+	import { WordState } from '$lib/models/Word';
+	
+	import {Word, Couple, GuessButton} from '../lib/components/game';
+	
+	
 	// TODO: import riddle dynamically
 	import { riddle } from '../today';
-	import { WordState } from '$lib/models/Word';
-	import { Game, GamePhase } from '$lib/models/Game';
-
+	
 	let game: Game = new Game(riddle);
 
 	// derived stores, to encapsule game realted calculations in the Game class
