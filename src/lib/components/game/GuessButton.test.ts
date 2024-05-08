@@ -33,7 +33,7 @@ describe('GuessButton', () => {
         expect(button).toBeEnabled();
     });
 
-    it("fires on:click", async  () => {
+    it("bubbles  on:click", async  () => {
         const user = userEvent.setup();
         const {component} = render(GuessButton);
         const onClick = vi.fn();
