@@ -20,7 +20,7 @@
 		"@fontsource-variable/open-sans": "^5.0.28",
 		"@fontsource/poppins": "^5.0.13",
 		"@iconify/svelte": "^3.1.6",
-		"@playwright/test": "^1.28.1",
+		"@playwright/test": "^1.43.1",
 		"@sveltejs/adapter-auto": "^3.0.0",
 		"@sveltejs/kit": "^2.0.0",
 		"@sveltejs/vite-plugin-svelte": "^3.1.0",

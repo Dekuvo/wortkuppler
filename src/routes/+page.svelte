@@ -2,12 +2,10 @@
 	import { PUBLIC_PUZZLE_HOST } from '$env/static/public';
 	import { onMount } from 'svelte';
 	import Icon from '@iconify/svelte';
-	
 
 	import { Game, GamePhase } from '$lib/models/Game';
 
 	import GameBoard from '$lib/components/game/GameBoard.svelte';
-	import { linear } from 'svelte/easing';
 
 	let game: Game | null = null;
 	let loadFailed = false;
