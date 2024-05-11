@@ -1,6 +1,6 @@
-import type { Riddle, RiddleWords } from '$lib/models/Riddle';
+import type { Puzzle, PuzzleWords } from '$lib/models/Puzzle';
 
-export let riddle: Riddle = {
+export let puzzle: Puzzle = {
     id: '123456',
     groups: {
         olympisch: {

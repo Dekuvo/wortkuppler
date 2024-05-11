@@ -3,7 +3,7 @@
 # wortkuppler
 **Ein tägliches Rätsel Spiel, bei dem es gilt Verbindungen zwischen Wörtern zu suchen**q
 
-> **wortkuppler**
+> **wort‧kupp‧ler**, der (/ˈvɔrtkʊplɐ/)
 > 
 > *Substantiv*
 >

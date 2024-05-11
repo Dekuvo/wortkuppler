@@ -2,7 +2,7 @@ import { type Readable, get } from 'svelte/store';
 
 import { Game, GamePhase } from './Game';
 
-const testRiddle = {
+const testPuzzle = {
     id: '1',
     groups: {
         'groupa': { title: 'Group A' },
@@ -19,7 +19,7 @@ const testRiddle = {
 // #region Game creation
 describe('Game creation', () => {
 
-    it('detects faulty/assymetric riddles', () => {
+    it('detects faulty/assymetric puzzles', () => {
 
         function faulty1() {
             const faulty = { id: '2', groups: {}, words: {} };
@@ -48,23 +48,23 @@ describe('Game creation', () => {
     });
 
     it('initializes correctly', () => {
-        const game = new Game(testRiddle);
+        const game = new Game(testPuzzle);
         expect(game).toBeInstanceOf(Game);
-        expect(game.riddle).toStrictEqual(testRiddle);
+        expect(game.puzzle).toStrictEqual(testPuzzle);
         expect(game.selection).toEqual([]);
         expect(game.guesses).toEqual([]);
     });
 
     it('can load given game states', () => {
-        let game = new Game(testRiddle, {
-            riddle: testRiddle.id,
+        let game = new Game(testPuzzle, {
+            puzzle: testPuzzle.id,
             selection: ['Word 1a'],
             guesses: []
         });
         expect(game.selection).toEqual(['Word 1a']);
         
-        game = new Game(testRiddle, {
-            riddle: testRiddle.id,
+        game = new Game(testPuzzle, {
+            puzzle: testPuzzle.id,
             selection: ['Word 1a', 'Word 2a'],
             guesses: [
                 { words: ['Word 1b', 'Word 2b'], group: 'groupb' },
@@ -73,17 +73,17 @@ describe('Game creation', () => {
         expect(game.guesses).toHaveLength(1);
 
         function faulty1() {
-            return new Game(testRiddle, {
-                riddle: 'incorrect id',
+            return new Game(testPuzzle, {
+                puzzle: 'incorrect id',
                 selection: [],
                 guesses: []
             });
         }
-        expect(faulty1).toThrowError('different riddle');
+        expect(faulty1).toThrowError('different puzzle');
 
         function faulty2() {
-            return new Game(testRiddle, {
-                riddle: testRiddle.id,
+            return new Game(testPuzzle, {
+                puzzle: testPuzzle.id,
                 selection: ['Unknown word'],
                 guesses: []
             });
@@ -91,8 +91,8 @@ describe('Game creation', () => {
         expect(faulty2).toThrowError('unknown words in selection');
 
         function faulty3() {
-            return new Game(testRiddle, {
-                riddle: testRiddle.id,
+            return new Game(testPuzzle, {
+                puzzle: testPuzzle.id,
                 selection: [],
                 guesses: [{ words: ['Unknown words'] }]
             });
@@ -100,8 +100,8 @@ describe('Game creation', () => {
         expect(faulty3).toThrowError('unknown words in guess');
 
         function faulty4() {
-            return new Game(testRiddle, {
-                riddle: testRiddle.id,
+            return new Game(testPuzzle, {
+                puzzle: testPuzzle.id,
                 selection: [],
                 guesses: [{ words: ['Word 1a', 'Word 2a'], group: 'unknown group' }]
             });
@@ -111,14 +111,14 @@ describe('Game creation', () => {
     });
 
 
-    it('caches words in riddle groups', () => {
-        const game = new Game(testRiddle);
-        expect.soft(game.riddle.groups['groupa'].words).toEqual(['Word 1a', 'Word 2a']);
-        expect.soft(game.riddle.groups['groupb'].words).toEqual(['Word 1b', 'Word 2b']);
+    it('caches words in puzzle groups', () => {
+        const game = new Game(testPuzzle);
+        expect.soft(game.puzzle.groups['groupa'].words).toEqual(['Word 1a', 'Word 2a']);
+        expect.soft(game.puzzle.groups['groupb'].words).toEqual(['Word 1b', 'Word 2b']);
     });
 
     it('creates a set of derived stores', () => {
-        const game = new Game(testRiddle);
+        const game = new Game(testPuzzle);
         expect(game.derived).toEqual({
             phase: expect.anything(),
             selectionEmpty: expect.anything(),
@@ -138,7 +138,7 @@ describe('Game creation', () => {
 describe('derived svelte store', () => {
 
     it('tracks phase from guesses and selection', () => {
-        const game = new Game(testRiddle);
+        const game = new Game(testPuzzle);
         const phase = game.derived.phase;
         expect(get(phase)).toBe(GamePhase.playing);
         game.guesses = [{ words: ['Word 1a', 'Word 2a'], group: 'groupa' }];
@@ -149,7 +149,7 @@ describe('derived svelte store', () => {
     });
 
     it('tracks selectionEmpty & selectionFull from selection', () => {
-        const game = new Game(testRiddle);
+        const game = new Game(testPuzzle);
         const empty = game.derived.selectionEmpty;
         const full = game.derived.selectionFull;
         expect(get(empty)).toBeTruthy();
@@ -163,13 +163,13 @@ describe('derived svelte store', () => {
     });
 
     it('tracks uncoupledWords, coupledGroupIds, mistakesRemaining & percentage from guesses', () => {
-        const game = new Game(testRiddle);
+        const game = new Game(testPuzzle);
         const uncoupledWords = game.derived.uncoupledWords;
         const coupledGroupIds = game.derived.coupledGroupIds;
         const mistakesRemaining = game.derived.mistakesRemaining;
         const percentage = game.derived.percentage;
 
-        expect.soft(get(uncoupledWords)).toEqual(Object.keys(testRiddle.words));
+        expect.soft(get(uncoupledWords)).toEqual(Object.keys(testPuzzle.words));
         expect.soft(get(coupledGroupIds)).toEqual([]);
         expect.soft(get(mistakesRemaining)).toBe(2);
         expect.soft(get(percentage)).toBeCloseTo(0);
@@ -194,21 +194,21 @@ describe('derived svelte store', () => {
 });
 // #endregion
 
-// #region riddle methods
-describe('riddle method', () => {
+// #region puzzle methods
+describe('puzzle method', () => {
 
     it('returns all words as array', () => {
-        const game = new Game(testRiddle);
+        const game = new Game(testPuzzle);
         expect(game.words).toEqual(['Word 1a', 'Word 2a', 'Word 1b', 'Word 2b']);
     });
 
     it('returns count of all words', () => {
-        const game = new Game(testRiddle);
+        const game = new Game(testPuzzle);
         expect(game.wordCount).toBe(4);
     });
 
     it('determines uncoupled words', () => {
-        const game = new Game(testRiddle);
+        const game = new Game(testPuzzle);
         expect(game.uncoupledWords).toEqual(['Word 1a', 'Word 2a', 'Word 1b', 'Word 2b']);
 
         game.guesses = [{ words: ['Word 1a', 'Word 2b'] }];
@@ -223,12 +223,12 @@ describe('riddle method', () => {
     });
 
     it('returns ids of all groups', () => {
-        const game = new Game(testRiddle);
+        const game = new Game(testPuzzle);
         expect(game.groupIds).toEqual(['groupa', 'groupb']);
     });
 
     it('fetches a group by it\'s id', () => {
-        const game = new Game(testRiddle);
+        const game = new Game(testPuzzle);
         const groupa = game.getGroupById('groupa');
         expect(groupa).toBeDefined();
         expect(groupa).toMatchObject({ 'title': 'Group A' });
@@ -243,7 +243,7 @@ describe('riddle method', () => {
 describe('game checks', () => {
 
     it('checks if selection is maxed', () => {
-        const game = new Game(testRiddle);
+        const game = new Game(testPuzzle);
         expect(game.isSelectionFull()).toBeFalsy();
 
         game.selection = ['Word 1a'];
@@ -254,7 +254,7 @@ describe('game checks', () => {
     });
 
     it('compares selection to previous mistakes', () => {
-        const game = new Game(testRiddle);
+        const game = new Game(testPuzzle);
         game.guesses = [{ words: ['Word 1a', 'Word 2b'] }, { words: ['Word 1a', 'Word 2a'], group: 'groupa' }];
 
         // empty and incomplete are never a mistakes
@@ -276,7 +276,7 @@ describe('game checks', () => {
     });
 
     it('checks if only one couple is remaining', () => {
-        const game = new Game(testRiddle);
+        const game = new Game(testPuzzle);
         expect(game.isLastCouple()).toBeFalsy();
 
         game.guesses = [{ words: ['Word 1a', 'Word 2a'], group: 'groupa' }];
@@ -293,7 +293,7 @@ describe('game checks', () => {
 describe('game action', () => {
 
     it('adds word to selection', () => {
-        const game = new Game(testRiddle);
+        const game = new Game(testPuzzle);
         expect(game.selection).toEqual([]);
 
         expect(game.select('Word 2a')).toBeTruthy();
@@ -313,7 +313,7 @@ describe('game action', () => {
 
 
     it('removes word from selection', () => {
-        const game = new Game(testRiddle);
+        const game = new Game(testPuzzle);
         game.selection = ['Word 1a', 'Word 2a'];
 
         expect(game.deselect('Word 1a')).toBeTruthy();
@@ -331,7 +331,7 @@ describe('game action', () => {
     });
 
     it('clears selection', () => {
-        const game = new Game(testRiddle);
+        const game = new Game(testPuzzle);
         game.selection = ['Word 1a', 'Word 2a'];
 
         expect(game.clearSelection()).toBeTruthy();
@@ -349,11 +349,11 @@ describe('game action', () => {
     });
 
     it('couples selection (guess)', () => {
-        // const testRiddleExpanded = { ...testRiddle };
-        // testRiddleExpanded.groups = Object.assign(testRiddleExpanded.groups, { 'group3': { title: 'Group 3' } });
-        // testRiddleExpanded.words = Object.assign(testRiddleExpanded.words, { 'Word 5': 'group3', 'Word 6': 'group3' });
+        // const testPuzzleExpanded = { ...testPuzzle };
+        // testPuzzleExpanded.groups = Object.assign(testPuzzleExpanded.groups, { 'group3': { title: 'Group 3' } });
+        // testPuzzleExpanded.words = Object.assign(testPuzzleExpanded.words, { 'Word 5': 'group3', 'Word 6': 'group3' });
 
-        const game = new Game(testRiddle);
+        const game = new Game(testPuzzle);
 
         // only full groups can be coupled
         game.selection = ['Word 1a'];
@@ -395,7 +395,7 @@ describe('game action', () => {
 describe('helper function', () => {
 
     it('counts remaining mistakes until loss', () => {
-        const game = new Game(testRiddle);
+        const game = new Game(testPuzzle);
         expect(game.getMistakesRemaining()).toBe(2);
 
         // mistaken
@@ -406,9 +406,9 @@ describe('helper function', () => {
         game.guesses = [{ words: ['Word 1a', 'Word 1b'] }, { words: ['Word 2a', 'Word 2b'] }];
         expect(game.getMistakesRemaining()).toBe(0);
 
-        // riddle sets mistakes Allowed
-        const mistakes10Riddle = { ...testRiddle, mistakesAllowed: 10 };
-        const game10Mistakes = new Game(mistakes10Riddle);
+        // puzzle sets mistakes Allowed
+        const mistakes10Puzzle = { ...testPuzzle, mistakesAllowed: 10 };
+        const game10Mistakes = new Game(mistakes10Puzzle);
         expect(game10Mistakes.getMistakesRemaining()).toBe(10);
         game10Mistakes.guesses = [{ words: ['Word 1a', 'Word 1b'] }, { words: ['Word 2a', 'Word 2b'] }];
         expect(game10Mistakes.getMistakesRemaining()).toBe(8);
@@ -416,7 +416,7 @@ describe('helper function', () => {
     });
 
     it('calculates the max count of words in selection, that belong to same group', () => {
-        const testRiddle3x3 = {
+        const testPuzzle3x3 = {
             id: '1',
             groups: {
                 'groupa': { title: 'Group A' },
@@ -435,7 +435,7 @@ describe('helper function', () => {
                 'Word 3c': 'groupc',
             }
         };
-        const game = new Game(testRiddle3x3);
+        const game = new Game(testPuzzle3x3);
         expect(game.getMaxCorrelation()).toBe(0);
 
         game.selection = ['Word 1a'];
@@ -468,7 +468,7 @@ describe('helper function', () => {
     });
 
     it('derives game phase from state', () => {
-        const game = new Game(testRiddle);
+        const game = new Game(testPuzzle);
         expect(game.getPhase()).toBe(GamePhase.playing);
 
         // lost
